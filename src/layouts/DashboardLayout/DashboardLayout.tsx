@@ -14,6 +14,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode; title: string }> = 
         <meta name="description" content="Cloth Marketplace example app using Solidity + NextJS" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       {isMounted ? (
         isConnected ? (
           <>

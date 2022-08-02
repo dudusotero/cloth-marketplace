@@ -6,24 +6,28 @@ import { ethers } from "hardhat";
 
 describe("ClothMarketplace", function () {
   async function deployClothMarketplaceFixture() {
-    const [contractOwner, account1, account2] = await ethers.getSigners();
+    const [contractOwner, account1, account2, account3] = await ethers.getSigners();
     const ClothMarketplace = await ethers.getContractFactory("ClothMarketplace");
     const clothMarketplace = await ClothMarketplace.deploy();
 
-    return { clothMarketplace, contractOwner, account1, account2 } as {
+    return { clothMarketplace, contractOwner, account1, account2, account3 } as {
       clothMarketplace: Contract;
       contractOwner: SignerWithAddress;
       account1: SignerWithAddress;
       account2: SignerWithAddress;
+      account3: SignerWithAddress;
     };
   }
 
   async function addClothesFixture(
     iterationsToAccount1: number,
     iterationsToAccount2: number,
+    iterationsToAccount3: number,
     customQuantity?: number,
   ) {
-    const { clothMarketplace, contractOwner, account1, account2 } = await loadFixture(deployClothMarketplaceFixture);
+    const { clothMarketplace, contractOwner, account1, account2, account3 } = await loadFixture(
+      deployClothMarketplaceFixture,
+    );
 
     if (iterationsToAccount1 > 0) {
       // Add clothes to account1
@@ -47,8 +51,19 @@ describe("ClothMarketplace", function () {
         );
       }
     }
+    if (iterationsToAccount3 > 0) {
+      // Add clothes to account3
+      for (let i = 0; i < iterationsToAccount3; i++) {
+        await clothMarketplace.addCloth(
+          "Test",
+          ethers.utils.parseEther("0.01"),
+          customQuantity ?? 10,
+          account3.address,
+        );
+      }
+    }
 
-    return { clothMarketplace, contractOwner, account1, account2 };
+    return { clothMarketplace, contractOwner, account1, account2, account3 };
   }
 
   describe("Deployment", function () {
@@ -92,6 +107,13 @@ describe("ClothMarketplace", function () {
   });
 
   describe("Getters", function () {
+    describe("getCustomers", function () {
+      it("Should return all customers", async function () {
+        const { clothMarketplace } = await loadFixture(addClothesFixture.bind(null, 1, 1, 2));
+        expect((await clothMarketplace.getCustomers()).length).to.be.equal(3);
+      });
+    });
+
     describe("getClothsByOwner", function () {
       it("Should return an empty array if no clothes are found", async function () {
         const { clothMarketplace, account1 } = await loadFixture(deployClothMarketplaceFixture);
@@ -102,7 +124,7 @@ describe("ClothMarketplace", function () {
         const clothesToBeCreated = 3;
         const customQuantity = 20;
         const { clothMarketplace, account1 } = await loadFixture(
-          addClothesFixture.bind(null, clothesToBeCreated, 2, customQuantity),
+          addClothesFixture.bind(null, clothesToBeCreated, 2, 0, customQuantity),
         );
 
         const clothes = await clothMarketplace.getClothsByOwner(account1.address);
@@ -119,7 +141,7 @@ describe("ClothMarketplace", function () {
         const CLOTH_ID = 0;
         const QUANTITY = 20;
         const { clothMarketplace, account1, account2 } = await loadFixture(
-          addClothesFixture.bind(null, 1, 1, QUANTITY),
+          addClothesFixture.bind(null, 1, 1, 0, QUANTITY),
         );
 
         await expect(

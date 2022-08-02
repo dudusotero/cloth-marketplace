@@ -24,8 +24,21 @@ contract ClothMarketplace is EtherWallet {
   }
 
   Cloth[] public clothes;
+  address[] public customers;
 
+  mapping(address => bool) private customerExists;
   mapping(address => mapping(uint256 => uint256)) public customerClothes;
+
+  function updateCustomersList(address _customer) internal {
+    if (!customerExists[_customer]) {
+      customers.push(_customer);
+      customerExists[_customer] = true;
+    }
+  }
+
+  function getCustomers() public view returns (address[] memory) {
+    return customers;
+  }
 
   function addCloth(
     string memory _name,
@@ -39,6 +52,7 @@ contract ClothMarketplace is EtherWallet {
     uint256 clothId = clothes.length;
     clothes.push(Cloth(clothId, _name, _price));
     customerClothes[_owner][clothId] = _quantity;
+    updateCustomersList(_owner);
   }
 
   function buyCloth(
@@ -57,6 +71,7 @@ contract ClothMarketplace is EtherWallet {
 
     customerClothes[_seller][_clothId] -= _quantity;
     customerClothes[msg.sender][_clothId] += _quantity;
+    updateCustomersList(msg.sender);
   }
 
   function getClothsByOwner(address _owner) external view returns (ClothWithQuantity[] memory) {

@@ -6,7 +6,8 @@ import { z } from "zod";
  * This way you can ensure the app isn't built with invalid env vars.
  */
 export const serverSchema = z.object({
-  // FOO: z.string(),
+  RINKEBY_RPC_URL: z.string(),
+  RINKEBY_DEPLOYER_PRIVATE_KEY: z.string(),
 });
 
 /**

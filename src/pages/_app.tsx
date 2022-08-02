@@ -2,7 +2,7 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { NextPageWithLayout } from "../types";
 
-import { WagmiConfig, createClient, defaultChains, configureChains } from "wagmi";
+import { WagmiConfig, createClient, defaultChains, configureChains, chain } from "wagmi";
 
 import { publicProvider } from "wagmi/providers/public";
 
